@@ -24,55 +24,144 @@ app.get(locationlatitudeGetURL, function (req, res) {
 });
 */
 var http = require('http');
+var httpRequest = require("./requests/http/httpRequest");
+var orchestration = require('./requests/Orchestration');
 
-let URI = "/api/v2/cengize/feeds/";
-let kutuURL = URI + "kutu";
-let locationlatitudeGetURL = kutuURL + ".locationlatitude/data";
-
-var options = {
-    host: 'io.adafruit.com',
-    path: locationlatitudeGetURL,
-    headers: { 'Content-Type': 'application/json' }
+var kutuInformation = 'kutu';
+var kutu = {
+    kutuLocationLatitude: {},
+    kutuLocationLongitude: {},
+    kutuID: {},
+    solidityRadio: {},
+    temperature: {}
 };
-var responseParse;
-var kutuLocationLatitude = {};
+var options = {};
 
-// TO DO :  Metod içinden asenkron olarak şuan doğru cevap gelmiyor.Bununla ilgilen.
+// TO DO : İleriki zamanlarda burada bir döngü yapılabilir.Kutu sayısı (kutuInformation = [kutu,kutu2 ...])'na göre otomatik işlem yapılabilir.
 
-function httpGetRequest(options, callback) {
-    http.get(options, function (res) {
-        var body = '';
-        res.on('data', function (chunk) {
-            body += chunk;
-        });
-        res.on('end', function () {
-            responseParse = JSON.parse(body);
-            console.log("Got a response: ", responseParse);
-        });
-    }).on('error', function (e) {
-        console.log("Got an error: ", e);
-        callback(new Error('HTTP request got an error'), null);
-        return;
+orchestration.locationlatitudeGetURL(kutuInformation, (opt) => {
+    console.log(opt);
+    options = opt;
+    httpRequest.httpGetRequest(options, function (err, res) {
+        if (err) {
+            console.log("Got an error: ", err);
+            return;
+        }
+        if (res.length === 0) {
+            console.log("Response boş döndü.Eklenecek veri yok !!");
+            return;
+        }
+        else {
+            kutu.kutuLocationLatitude.id = res[0].id;
+            kutu.kutuLocationLatitude.value = res[0].value;
+            kutu.kutuLocationLatitude.feed_id = res[0].feed_id;
+            kutu.kutuLocationLatitude.created_at = res[0].created_at;
+            kutu.kutuLocationLatitude.feed_key = res[0].feed_key;
+            console.log("Kutu Location Latitude Bilgisi :", kutu.kutuLocationLatitude);
+            console.log("\n");
+        }
     });
-    callback(null, responseParse);
-}
-
-httpGetRequest(options, function(err, res){
-    if (err){
-        console.log("Hata var.");
-        return;
-    }
-    kutuLocationLatitude = res;
-    /*
-    kutuLocationLatitude.id = res[0].id;
-    kutuLocationLatitude.value = res[0].value;
-    kutuLocationLatitude.feed_id = res[0].feed_id;
-    kutuLocationLatitude.created_at = res[0].created_at;
-    kutuLocationLatitude.feed_key = res[0].feed_key;
-    */
-    console.log("Kutu Location Latitude Bilgisi :", kutuLocationLatitude);
-
 });
+
+orchestration.locationlongitudeGetURL(kutuInformation, (opt) => {
+    console.log(opt);
+    options = opt;
+    httpRequest.httpGetRequest(options, function (err, res) {
+        if (err) {
+            console.log("Got an error: ", err);
+            return;
+        }
+        if (res.length === 0) {
+            console.log("Response boş döndü.Eklenecek veri yok !!");
+            return;
+        }
+        else {
+            kutu.kutuLocationLongitude.id = res[0].id;
+            kutu.kutuLocationLongitude.value = res[0].value;
+            kutu.kutuLocationLongitude.feed_id = res[0].feed_id;
+            kutu.kutuLocationLongitude.created_at = res[0].created_at;
+            kutu.kutuLocationLongitude.feed_key = res[0].feed_key;
+            console.log("Kutu Location Longitude Bilgisi :", kutu.kutuLocationLongitude);
+            console.log("\n");
+        }
+    });
+});
+
+orchestration.boxID_URL(kutuInformation, (opt) => {
+    console.log(opt);
+    options = opt;
+    httpRequest.httpGetRequest(options, function (err, res) {
+        if (err) {
+            console.log("Got an error: ", err);
+            return;
+        }
+        if (res.length === 0) {
+            console.log("Response boş döndü.Eklenecek veri yok !!");
+            return;
+        }
+        else {
+            kutu.kutuID.id = res[0].id;
+            kutu.kutuID.value = res[0].value;
+            kutu.kutuID.feed_id = res[0].feed_id;
+            kutu.kutuID.created_at = res[0].created_at;
+            kutu.kutuID.feed_key = res[0].feed_key;
+            console.log("Kutu ID  Bilgisi :", kutu.kutuID);
+            console.log("\n");
+        }
+    });
+});
+
+orchestration.solidityRadioGetURL(kutuInformation, (opt) => {
+    console.log(opt);
+    options = opt;
+    httpRequest.httpGetRequest(options, function (err, res) {
+        if (err) {
+            console.log("Got an error: ", err);
+            return;
+        }
+        if (res.length === 0) {
+            console.log("Response boş döndü.Eklenecek veri yok !!");
+            return;
+        }
+        else {
+            // TO DO : Buradaki res[0] bize son response değerini veriyor , bazı durumlarda tüm response'ler gerekebilir.
+            kutu.solidityRadio.id = res[0].id;
+            kutu.solidityRadio.value = res[0].value;
+            kutu.solidityRadio.feed_id = res[0].feed_id;
+            kutu.solidityRadio.created_at = res[0].created_at;
+            kutu.solidityRadio.feed_key = res[0].feed_key;
+            console.log("Kutu Doluluk  Bilgisi :", kutu.solidityRadio);
+            console.log("\n");
+        }
+    });
+});
+
+orchestration.temperatureGetURL(kutuInformation, (opt) => {
+    console.log(opt);
+    options = opt;
+    httpRequest.httpGetRequest(options, function (err, res) {
+        if (err) {
+            console.log("Got an error: ", err);
+            return;
+        }
+        if (res.length === 0) {
+            console.log("Response boş döndü.Eklenecek veri yok !!");
+            return;
+        }
+        else {
+            // TO DO : Buradaki res[0] bize son response değerini veriyor , bazı durumlarda tüm response'ler gerekebilir.
+            kutu.temperature.id = res[0].id;
+            kutu.temperature.value = res[0].value;
+            kutu.temperature.feed_id = res[0].feed_id;
+            kutu.temperature.created_at = res[0].created_at;
+            kutu.temperature.feed_key = res[0].feed_key;
+            console.log("Kutu Sıcaklık  Bilgisi :", kutu.temperature);
+            console.log("\n");
+        }
+    });
+});
+
+
 
 
 

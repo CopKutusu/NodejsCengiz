@@ -21,7 +21,7 @@ function locationlongitudeGetURL(kutuNumber, callback) {
     options.path =  kutuURL + ".locationlongitude/data";
     callback(options);
 }
-function solidityRadioGetURL(kutuNumber, callback) {
+function solidityRatioGetURL(kutuNumber, callback) {
     kutuURL = options.URI + kutuNumber;
     options.path =  kutuURL + ".solidityratio/data";
     callback(options);
@@ -36,5 +36,5 @@ function temperatureGetURL(kutuNumber, callback) {
 exports.locationlatitudeGetURL = locationlatitudeGetURL;
 exports.locationlongitudeGetURL = locationlongitudeGetURL;
 exports.boxID_URL = boxID_URL;
-exports.solidityRadioGetURL = solidityRadioGetURL;
+exports.solidityRatioGetURL = solidityRatioGetURL;
 exports.temperatureGetURL = temperatureGetURL;

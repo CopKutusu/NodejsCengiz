@@ -32,12 +32,13 @@ var kutu = {
     kutuLocationLatitude: {},
     kutuLocationLongitude: {},
     kutuID: {},
-    solidityRadio: {},
-    temperature: {}
+    solidityRatio: [],
+    temperature: []
 };
 var options = {};
 
 // TO DO : İleriki zamanlarda burada bir döngü yapılabilir.Kutu sayısı (kutuInformation = [kutu,kutu2 ...])'na göre otomatik işlem yapılabilir.
+
 
 orchestration.locationlatitudeGetURL(kutuInformation, (opt) => {
     console.log(opt);
@@ -111,7 +112,8 @@ orchestration.boxID_URL(kutuInformation, (opt) => {
     });
 });
 
-orchestration.solidityRadioGetURL(kutuInformation, (opt) => {
+
+orchestration.solidityRatioGetURL(kutuInformation, (opt) => {
     console.log(opt);
     options = opt;
     httpRequest.httpGetRequest(options, function (err, res) {
@@ -124,17 +126,27 @@ orchestration.solidityRadioGetURL(kutuInformation, (opt) => {
             return;
         }
         else {
-            // TO DO : Buradaki res[0] bize son response değerini veriyor , bazı durumlarda tüm response'ler gerekebilir.
-            kutu.solidityRadio.id = res[0].id;
-            kutu.solidityRadio.value = res[0].value;
-            kutu.solidityRadio.feed_id = res[0].feed_id;
-            kutu.solidityRadio.created_at = res[0].created_at;
-            kutu.solidityRadio.feed_key = res[0].feed_key;
-            console.log("Kutu Doluluk  Bilgisi :", kutu.solidityRadio);
+
+            for (var key in res) {
+                if (res.hasOwnProperty(key)) {
+                    kutu.solidityRatio.push(
+                        {
+                            id: res[key].id,
+                            value: res[key].value,
+                            feed_id: res[key].feed_id,
+                            created_at: res[key].created_at,
+                            feed_key: res[key].feed_key
+                        }
+                    );
+                }
+            }
+            //console.log("Kutu Doluluk  Bilgisi :", kutu.solidityRatio[kutu.solidityRatio.length-1]);
+            console.log("Kutu Doluluk  Bilgisi :", kutu.solidityRatio);
             console.log("\n");
         }
     });
 });
+
 
 orchestration.temperatureGetURL(kutuInformation, (opt) => {
     console.log(opt);
@@ -149,19 +161,22 @@ orchestration.temperatureGetURL(kutuInformation, (opt) => {
             return;
         }
         else {
-            // TO DO : Buradaki res[0] bize son response değerini veriyor , bazı durumlarda tüm response'ler gerekebilir.
-            kutu.temperature.id = res[0].id;
-            kutu.temperature.value = res[0].value;
-            kutu.temperature.feed_id = res[0].feed_id;
-            kutu.temperature.created_at = res[0].created_at;
-            kutu.temperature.feed_key = res[0].feed_key;
+
+            for (var key in res) {
+                if (res.hasOwnProperty(key)) {
+                    kutu.temperature.push(
+                        {
+                            id: res[key].id,
+                            value: res[key].value,
+                            feed_id: res[key].feed_id,
+                            created_at: res[key].created_at,
+                            feed_key: res[key].feed_key
+                        }
+                    );
+                }
+            }
             console.log("Kutu Sıcaklık  Bilgisi :", kutu.temperature);
             console.log("\n");
         }
     });
 });
-
-
-
-
-

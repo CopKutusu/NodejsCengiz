@@ -24,9 +24,9 @@ app.get(locationlatitudeGetURL, function (req, res) {
 });
 */
 var http = require('http');
-var httpRequest = require("./requests/http/httpRequest");
+var httpRequest = require('./requests/http/httpRequest');
 var orchestration = require('./requests/Orchestration');
-
+var googleMaps = require('./requests/googleMapsRequests/mapsRequests');
 var kutuInformation = 'kutu';
 var kutu = {
     kutuLocationLatitude: {},
@@ -179,4 +179,22 @@ orchestration.temperatureGetURL(kutuInformation, (opt) => {
             console.log("\n");
         }
     });
+});
+
+
+// TO DO : Burada ornek olarak başlangic ve bitis konumlari tanimlanip yol hesaplanmiştir.Yapilmasi gereken Cop araciin degisken konumunun ogrenilmesi ve
+// en dolu cop kutusu ve konumunu belirleyip bu iki degeri origin ve destination icerisine yazilacaktir.
+let origin = {
+    latitude : 40.770960,
+    longitude : 29.891243
+};
+
+let destination = {
+    latitude : 40.768091,
+    longitude : 29.937862
+}
+
+googleMaps.distanceCalculate(origin, destination, (result)=>{
+
+    console.log('Sonuc : ', result.routes[0].legs);
 });

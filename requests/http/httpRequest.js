@@ -1,4 +1,4 @@
-var http = require('http');
+var http = require('https');
 
 function httpGetRequest(options, callback) {
     var responseParse;

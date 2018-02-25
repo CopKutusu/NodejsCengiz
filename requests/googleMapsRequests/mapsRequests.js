@@ -1,3 +1,5 @@
+'use strict';
+
 var httpRequest = require('../http/httpRequest');
 
 var options = {

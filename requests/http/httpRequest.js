@@ -1,3 +1,5 @@
+'use strict';
+
 var http = require('https');
 
 function httpGetRequest(options, callback) {

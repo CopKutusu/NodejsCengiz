@@ -1,3 +1,4 @@
+'use strict';
 
 var options = {
     host: 'io.adafruit.com',
@@ -27,7 +28,6 @@ function solidityRatioGetURL(kutuNumber, callback) {
     callback(options);
 }
 function temperatureGetURL(kutuNumber, callback) {
-    //console.log("in Function");
     kutuURL = options.URI + kutuNumber;
     options.path =  kutuURL + ".temperature/data";
     callback(options);

@@ -108,6 +108,7 @@ let boxes = [
         temperature: 1
     },
     {
+        // solidity 43 -> 1 yapılarak araç listesi test edilebilir
         kutuLocationLatitude:'40.772725', 
         kutuLocationLongitude:'29.990682',
         solidityRatio: 43,

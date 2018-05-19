@@ -13,12 +13,6 @@ function boxCreater (result, dolulukEsikDegeri, box){
         // Veritabanından gelen box sayisi kadar box nesnesi olusturulur.
     var index = 0;
     for (var i = 0; i < result.length; i++) {
-      
-    
-    //    if (result[i].doluluk >= dolulukEsikDegeri && (String(result[i].available) == '1') {
-      
-    // TODO : Burada doluluk değeri kontrolü ile kutu sayısı beliliyorum fakat assignValue metoduna burada yaratılan kutuyu gönderdigimizde
-    // eşik değerinden küçük olanlar içinde bir işlem gerekiyor bu durumdada index hatası vermesi muhtemel
     if (result[i].doluluk >= dolulukEsikDegeri) {
             box[index] = {};
             box[index].locationLatitude;
@@ -42,11 +36,7 @@ function assignValueBox(result, dolulukEsikDegeri, box){
     var index = 0;
     for (var i = 0; i < result.length; i++) {
         // Doluluk değeri eşik değerinden büyük olan kutuların bilgilerini veritabanından al
-     
-     
-      //  if (result[i].doluluk >= dolulukEsikDegeri  && (String(result[i].available) == '1')) {
-
-            if (result[i].doluluk >= dolulukEsikDegeri) {
+        if (result[i].doluluk >= dolulukEsikDegeri) {
             box[index].locationLatitude = result[i].locationLatitude;
             box[index].locationLongitude = result[i].locationLongitude;
             box[index].solidityRatio = result[i].doluluk;
@@ -54,21 +44,11 @@ function assignValueBox(result, dolulukEsikDegeri, box){
             box[index].available = result[i].available;
             box[index].availableNo = result[i].availableNo;
             index++;
-        } else if (result[i].doluluk < dolulukEsikDegeri && result[i].available == '0'){
-            // TODO : Bu kontrol kodu karıştırabilir, eğer karışırsa kaldır.
-            box[index].locationLatitude = result[i].locationLatitude;
-            box[index].locationLongitude = result[i].locationLongitude;
-            box[index].solidityRatio = result[i].doluluk;
-            box[index].temperature = result[i].sicaklık;
-            box[index].availableNo = result[i].availableNo;
-            box[index].available = '1';
-            index++;
-        }
+        } 
         if (i == result.length-1){
             for (var j=0;j< box.length; j++){
                 console.log('Box index :' + i + '\n ' + box[j] );
             }
-
             return box;
         }
     }
@@ -110,8 +90,6 @@ function assignValueTruck (result, truck ){
     }
 }
 
-
-// TODO  : burayada belki availableNo ozelligi eklenecek ve main.js içinde çağrıldıgı yerlerde guncellenecek
 function dataCreater (data, kutu){
     for (var k = 0; k < kutu.length; k++) {
         data[k] = {};

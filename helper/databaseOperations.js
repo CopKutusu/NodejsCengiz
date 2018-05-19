@@ -27,9 +27,9 @@ function checkFromDatabase(table, attribute, callback) {
         //     "' and sicaklık = '" + (attribute.temperature) + "';";
 
 
-// TODO: Yazılan yeni sorgunun dogru calisip calismadigi kontrol edilecek.
+        // TODO: Yazılan yeni sorgunun dogru calisip calismadigi kontrol edilecek.
         var checkFromDatabaseQuery = " Select count(*) as sayi from xtbadmin.kutular where locationLatitude= '" + (attribute.kutuLocationLatitude) +
-            "' and  locationLongitude = '" + (attribute.kutuLocationLongitude) +"';";
+            "' and  locationLongitude = '" + (attribute.kutuLocationLongitude) + "';";
 
         logger.info('checkFromDatabase - Kutular tablosu kontrol sorgusu : ', checkFromDatabaseQuery);
 
@@ -99,8 +99,8 @@ function updateDatabase(table, available, attribute, callback) {
     // available sorgusunun çalışması için bir kontrol , ileride burası daha düzgün bir yapıya sahip olmalı
     if (table == 'kutular' && available == '0') {
         // NOT: Kutu id'lere gore guncelleme yapılamadi cunku id otomatik artıyordu.
-        var updateDatabaseQuery = " UPDATE xtbadmin.kutular SET available = '" + String(available) +  "', availableNo = '" +  String(attribute.availableNo) +
-            "' WHERE locationLatitude = '" +  String(attribute.kutuLocationLatitude) + "' and locationLongitude = '" + String(attribute.kutuLocationLongitude)+"';";
+        var updateDatabaseQuery = " UPDATE xtbadmin.kutular SET available = '" + String(available) + "', availableNo = '" + String(attribute.availableNo) +
+            "' WHERE locationLatitude = '" + String(attribute.kutuLocationLatitude) + "' and locationLongitude = '" + String(attribute.kutuLocationLongitude) + "';";
 
         //   logger.info('Kutular tablosu guncelleme sorgusu : ',updateDatabaseQuery );
         dbConnection.query(updateDatabaseQuery, function (error) {
@@ -113,8 +113,8 @@ function updateDatabase(table, available, attribute, callback) {
     }
     else if (table == 'kutular' && available == '1') {
         // NOT: Kutu id'lere gore guncelleme yapılamadi cunku id otomatik artıyordu.
-        var updateDatabaseQuery = " UPDATE xtbadmin.kutular SET available = '" + String(available) + "', availableNo = '" +  String(attribute.availableNo) +
-            "' WHERE locationLatitude = '" +  String(attribute.kutuLocationLatitude) + "' and locationLongitude = '" + String(attribute.kutuLocationLongitude)+"';";
+        var updateDatabaseQuery = " UPDATE xtbadmin.kutular SET available = '" + String(available) + "', availableNo = '" + String(attribute.availableNo) +
+            "' WHERE locationLatitude = '" + String(attribute.kutuLocationLatitude) + "' and locationLongitude = '" + String(attribute.kutuLocationLongitude) + "';";
 
         //   logger.info('Kutular tablosu guncelleme sorgusu : ',updateDatabaseQuery );
         dbConnection.query(updateDatabaseQuery, function (error) {
@@ -131,7 +131,7 @@ function updateDatabase(table, available, attribute, callback) {
             "' , locationLongitude = '" + String(attribute.kutuLocationLongitude) +
             "' , doluluk = '" + String(attribute.solidityRatio) +
             "' , sicaklık = '" + String(attribute.temperature) +
-            "' WHERE locationLatitude = '" +  String(attribute.kutuLocationLatitude) + "' and locationLongitude = '" + String(attribute.kutuLocationLongitude)+"';";
+            "' WHERE locationLatitude = '" + String(attribute.kutuLocationLatitude) + "' and locationLongitude = '" + String(attribute.kutuLocationLongitude) + "';";
 
         //   logger.info('Kutular tablosu guncelleme sorgusu : ',updateDatabaseQuery );
         dbConnection.query(updateDatabaseQuery, function (error) {
@@ -144,8 +144,8 @@ function updateDatabase(table, available, attribute, callback) {
     }
     else if (table == 'araclar' && available == '0') {
         // TODO : Araclar tablosundada aracID otomatik artıyor.Bir primary key belirlenmeli (orn: plaka)
-        var updateDatabaseQuery = " UPDATE xtbadmin.araclar SET available = '" + String(available) + "', availableNo = '" +  String(attribute.availableNo) +
-        "' WHERE locationLatitude = '" +  String(attribute.lat) + "' and locationLongitude = '" + String(attribute.lng)+"';";
+        var updateDatabaseQuery = " UPDATE xtbadmin.araclar SET available = '" + String(available) + "', availableNo = '" + String(attribute.availableNo) +
+            "' WHERE locationLatitude = '" + String(attribute.lat) + "' and locationLongitude = '" + String(attribute.lng) + "';";
         console.log('UPDATE SORGUSU :', updateDatabaseQuery);
         dbConnection.query(updateDatabaseQuery, function (error) {
             if (error) {
@@ -157,8 +157,8 @@ function updateDatabase(table, available, attribute, callback) {
     }
     else if (table == 'araclar' && available == '1') {
         // TODO : Araclar tablosundada aracID otomatik artıyor.Bir primary key belirlenmeli (orn: plaka)
-        var updateDatabaseQuery = " UPDATE xtbadmin.araclar SET available = '" + String(available) + "', availableNo = '" +  String(attribute.availableNo) +
-        "' WHERE locationLatitude = '" +  String(attribute.lat) + "' and locationLongitude = '" + String(attribute.lng)+"';";
+        var updateDatabaseQuery = " UPDATE xtbadmin.araclar SET available = '" + String(available) + "', availableNo = '" + String(attribute.availableNo) +
+            "' WHERE locationLatitude = '" + String(attribute.lat) + "' and locationLongitude = '" + String(attribute.lng) + "';";
         dbConnection.query(updateDatabaseQuery, function (error) {
             if (error) {
                 callback(error);
@@ -187,46 +187,106 @@ function updateDatabase(table, available, attribute, callback) {
 function getDataFromDatabase(table, callback) {
     if (table == 'kutular') {
         var getDataFromDatabaseQuery = " Select locationLatitude,locationLongitude,doluluk,sicaklık,available,availableNo from xtbadmin.kutular;";
-
         logger.info('getDataFromDatabase - Kutular tablosundan verileri getirme sorgusu : ', getDataFromDatabaseQuery);
-
-
         dbConnection.query(getDataFromDatabaseQuery, function (error, result, fields) {
-            if (error)
-            {
+            if (error) {
                 callback(error);
                 return;
             }
             else {
-              //   logger.info('Kutular tablosundaki veriler :', result);
-              //   logger.info('Kutular tablosundaki veriler - 0 :', result[0]);
-               //  logger.info('Kutular tablosundaki veriler - 1 :', result[1]);
-               //  logger.info('Kutular tablosundaki veriler length :', result.length);
+                //   logger.info('Kutular tablosundaki veriler :', result);
+                //   logger.info('Kutular tablosundaki veriler - 0 :', result[0]);
+                //  logger.info('Kutular tablosundaki veriler - 1 :', result[1]);
+                //  logger.info('Kutular tablosundaki veriler length :', result.length);
 
                 // logger.info('Kutular Fields :', fields);
-                 callback(null, result);
+                callback(null, result);
             }
         });
     }
     else if (table == 'araclar') {
-
         var getDataFromDatabaseQuery = " Select locationLatitude,locationLongitude,city,available,availableNo from xtbadmin.araclar;";
-
         logger.info('getDataFromDatabase - Araclar tablosundaki verileri getirme sorgusu: ', getDataFromDatabaseQuery);
-
         dbConnection.query(getDataFromDatabaseQuery, function (error, result, fields) {
             if (error)
                 callback(error);
             else {
                 logger.info('getDataFromDatabase - Araclar tablosundaki veriler :', result);
-               // logger.info('Araclar Fields :', fields);
+                // logger.info('Araclar Fields :', fields);
                 callback(null, result);
             }
         });
     }
 }
 
+
+function updateIfTresholdKutu(table, dolulukEsikDegeri, result) {
+
+    // Temizlenen kutularda kalan availableNo değerleri bulunur.Bu numara araçlardada mevcuttur.Kutulardan sonra araçlarında availableNo değerleri -1 yapılacaktır.
+    var aracListesi = [];
+    var availableColumn = '1';
+    var availableNoColumn = '-1';
+    for (var i = 0; i < result.length; i++) {
+        //  console.log('DOLULUK : ' + result[i].doluluk+  ' ' + 'AVAILABLE : ' + result[i].available);
+        if (table == 'kutular' && result[i].available == '0' && result[i].doluluk < dolulukEsikDegeri) {
+            aracListesi.push(result[i].availableNo);
+
+            // NOT: Kutu id'lere gore guncelleme yapılamadi cunku id otomatik artıyordu.
+            var updateDatabaseQuery = " UPDATE xtbadmin.kutular SET available = '" + String(availableColumn) + "', availableNo = '" + String(availableNoColumn) +
+                "' WHERE locationLatitude = '" + String(result[i].locationLatitude) + "' and locationLongitude = '" + String(result[i].locationLongitude) + "';";
+            logger.info('updateIfTresholdKutu - Kutular tablosundaki available sütununu güncelleme sorgusu : ', updateDatabaseQuery);
+
+            dbConnection.query(updateDatabaseQuery, function (error) {
+                if (error) {
+                    logger.info('updateIfTresholdKutu - Kutular tablosundaki available sütununu güncelleme sorgusu  hata verdi: ', error);
+                    return;
+                }
+            });
+        }
+        if (i == result.length - 1) {
+            //  console.log('ARAC LISTESI :', aracListesi);
+            return aracListesi;
+        }
+    }
+}
+
+function updateIfTresholdArac(table, aracListesi, result) {
+
+    // Temizlenen kutularda kalan availableNo değerleri bulunur.Bu numara araçlardada mevcuttur.Kutulardan sonra araçlarında availableNo değerleri -1 yapılacaktır
+
+    var availableColumn = '1';
+    var availableNoColumn = '-1';
+    for (var i = 0; i < result.length; i++) {
+        //  console.log('DOLULUK : ' + result[i].doluluk+  ' ' + 'AVAILABLE : ' + result[i].available);
+        if (table == 'araclar' && result[i].available == '0') {
+            for (var j = 0; j < aracListesi.length; j++) {
+                if (aracListesi[j] == result[i].availableNo) {
+                    console.log('AVALILABLE DEGER: ', result[i].availableNo);
+                    // NOT: Kutu id'lere gore guncelleme yapılamadi cunku id otomatik artıyordu.
+                    var updateDatabaseQuery = " UPDATE xtbadmin.araclar SET available = '" + String(availableColumn) + "', availableNo = '" + String(availableNoColumn) +
+                        "' WHERE locationLatitude = '" + String(result[i].locationLatitude) + "' and locationLongitude = '" + String(result[i].locationLongitude) + "';";
+
+                    logger.info('updateIfTresholdArac - Araclar tablosundaki available sütununu güncelleme sorgusu : ', updateDatabaseQuery);
+                    dbConnection.query(updateDatabaseQuery, function (error) {
+                        if (error) {
+                            logger.info('updateIfTresholdArac - Araclar tablosundaki available sütununu güncelleme sorgusu  hata verdi: ', error);
+                            return error;
+                        }
+                    });
+                }
+            }
+        }
+        if (i == result.length - 1) {
+            //  console.log('ARAC LISTESI :', aracListesi);
+            return aracListesi;
+        }
+    }
+}
+
+
 exports.addToDatabase = addToDatabase;
 exports.checkFromDatabase = checkFromDatabase;
 exports.updateDatabase = updateDatabase;
 exports.getDataFromDatabase = getDataFromDatabase;
+exports.updateIfTresholdKutu = updateIfTresholdKutu;
+exports.updateIfTresholdArac = updateIfTresholdArac;

@@ -42,23 +42,27 @@ sampleDataAddDatabase.sampleTruckAddDatabase(function(error, prefixError){
 });
 */
 
+// kodun ilerleyen kısımlarında doluluk eşik değerini aşan kutularda işlemler yapılır.
 var dolulukEsikDegeri = 35;
 var kutu = [];
 var arac = [];
+
+// Eğer kutu boşaltımışsa ve available değeri güncellenmemişse , available değerini güncellemeden önce ilgisi olan araç bulunur.
+var degisecekAvailableArac;
 
 distance.key('AIzaSyD2zhehMtRu-69wZ4fuoUO0Exn877gAnx8');
 distance.units('metric');
 distance.mode('driving');
 
+// veritabanından kutular tablosundan veriler getirilir.
 databaseOperations.getDataFromDatabase('kutular', function (error, result) {
-    // TODO : Eğer çöp kutusunun available değeri 0 ve doluluk değeri eşik değerinden küçükse 
-    // bü çöp kutusu boşaltılmış demektir.Available değeri 1 olarak değiştirilir.
     if (error){
         logger.info('databaseOperations.getDataFromDatabase- kutular - error : ', error);
         return;
     }
-  //  console.log('KUTU: ');
-   // console.log(result);
+    degisecekAvailableArac = databaseOperations.updateIfTresholdKutu('kutular', dolulukEsikDegeri, result);
+    //console.log('ARAC LISTESI :' ,degisecekAvailableArac);
+
     kutu = createHelper.boxCreater(result, dolulukEsikDegeri, kutu);
 
     var distanceArray = [];
@@ -74,13 +78,16 @@ databaseOperations.getDataFromDatabase('kutular', function (error, result) {
             callback();
         },
         function (callback) {
+            // veritabanından araclar tablosundan veriler getirilir.
             databaseOperations.getDataFromDatabase('araclar', function (errorArac, resultArac) {
                 if (errorArac){
                     logger.info('databaseOperations.getDataFromDatabase- araclar - error : ', errorArac);
                     return;
                 }
-                // TODO : Eğer bir aracın çöp kutusuyla işi bitmiş ise available değeri 0 -> 1 yapılmalıdır.Burada kontrol olarak
-                // en son kullanılan çöp kutusuna da ihtiyaç vardır.
+                // bu değişti değeri çok önemli değil sadece fonksiyon bir sonuç döndürdüğü için koydum.
+                var degisti ;
+                degisti = databaseOperations.updateIfTresholdArac('araclar', degisecekAvailableArac, resultArac);
+
                 arac = createHelper.truckCreater(resultArac, arac);
                 arac = createHelper.assignValueTruck(resultArac, arac);
                 callback();

@@ -1,12 +1,19 @@
 {
     "name": "CopKutusu",
-    "version": "1.2.0",
+    "version": "1.4.0",
     "description": "Cop Kutusu Projesi kodlaridir.",
     "dependencies": {
+        "async": "^2.6.0",
         "eslint": "^4.18.0",
         "express": "^4.16.2",
+        "google-distance": "^1.0.1",
+        "google-distance-matrix": "^1.1.1",
         "https": "^1.0.0",
         "json-parser": "^1.1.5",
-        "log4js": "^2.5.3"
+        "log4js": "^2.5.3",
+        "mathjs": "^4.1.2",
+        "mysql": "^2.15.0",
+        "mysqli": "^2.0.1",
+        "node-matrix": "^1.0.0"
     }
 }

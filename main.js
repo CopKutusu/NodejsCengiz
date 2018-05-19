@@ -1,247 +1,325 @@
 'use strict';
-/*
-const jsonParser = require("json-parser");
-let express = require('express');
 
-let app = express(); // the main app
-let admin = express(); // the sub app
-
-let host = "io.adafruit.com";
-let URI = "/api/v2/cengize/feeds";
-
-let kutuURL = URI + "kutu";
-let locationlatitudeGetURL = kutuURL + ".locationlatitude/data";
-console.log("URI :", URI);
-console.log("KutuURL : ",kutuURL);
-console.log("URL : ",locationlatitudeGetURL);
-
-app.listen(host);
-
-app.get(locationlatitudeGetURL, function (req, res) {
-
-  console.log(res); // /admin
-  //res.send('Admin Homepage');
-
-});
-*/
-var http = require('http');
-var httpRequest = require('./requests/http/httpRequest');
-var orchestration = require('./requests/Orchestration');
 var googleMaps = require('./requests/googleMapsRequests/mapsRequests');
-var kutuInformation = ['kutu', 'kutu2'];
+const log4js = require('log4js');
+var sampleBoxes = require('./config/boxDatas');
+var sampleCopAraclari = require('./config/copAraciData');
+var distance = require('google-distance-matrix');
+var databaseOperations = require('./helper/databaseOperations');
+var getDataFromAdafruit = require('./helper/getDataFromAdafruit');
+var sampleDataAddDatabase = require('./helper/sampleDataAddDatabase');
 
-var options = {};
-var googleMapsPath = {};
+var databaseOperations = require('./helper/databaseOperations');
+var createHelper = require('./helper/createHelper');
+var printHelper = require('./helper/printHelper');
+var sortHelper = require('./helper/sortHelper');
+var async = require('async');
 
-
-kutuInformation.forEach(element => {
-
-    // Kutu nesnesini foreach disinda tanimlayinca asenkron problemi cikiyordu.Buna dikkat !!
-    var kutu = {
-        kutuLocationLatitude: {},
-        kutuLocationLongitude: {},
-        kutuID: {},
-        solidityRatio: [],
-        temperature: []
-    };
-
-    // requestIDS dizisine adafruitten cekilen her verinin id'si giriliyor.Cakismayi onlemek icin asagida kontrol yapiliyor.
-    var requestIDS = [];
-    orchestration.solidityRatioGetURL(element, (opt) => {
-        console.log(opt);
-        options = opt;
-        httpRequest.httpGetRequest(options, function (err, res) {
-            if (err) {
-                console.log("Got an error: ", err);
-                return;
-            }
-            if (res.length === 0) {
-                console.log("Response boş döndü.Eklenecek veri yok !!");
-                return;
-            }
-            else {
-
-                for (var key in res) {
-                    if (res.hasOwnProperty(key)) {
-                        // Ilk adimda solidityratio nesnesi bos.Veri ekleniyor.
-                        if (key === 0) {
-                            requestIDS.push(res[key].id);
-                            kutu.solidityRatio.push(
-                                {
-                                    id: res[key].id,
-                                    value: res[key].value,
-                                    feed_id: res[key].feed_id,
-                                    created_at: res[key].created_at,
-                                    feed_key: res[key].feed_key
-                                }
-                            );
-                        }
-                        // 0.adimdan sonraki adimlarda daha once donen response'lerin id'leri ayni olmayanlari aliniyor.
-                        else if (requestIDS.indexOf(res[key].id) < 0) {
-                            requestIDS.push(res[key].id);
-                            kutu.solidityRatio.push(
-                                {
-                                    id: res[key].id,
-                                    value: res[key].value,
-                                    feed_id: res[key].feed_id,
-                                    created_at: res[key].created_at,
-                                    feed_key: res[key].feed_key
-                                }
-                            );
-                        }
-
-                    }
-                }
-                //console.log("Kutu Doluluk  Bilgisi :", kutu.solidityRatio[kutu.solidityRatio.length-1]);
-                console.log("Kutu Doluluk  Bilgisi :", kutu.solidityRatio);
-                console.log("\n");
-            }
-        });
-    });
-
-    orchestration.locationlatitudeGetURL(element, (opt) => {
-        console.log(opt);
-        options = opt;
-        httpRequest.httpGetRequest(options, function (err, res) {
-            if (err) {
-                console.log("Got an error: ", err);
-                return;
-            }
-            if (res.length === 0) {
-                console.log("Response boş döndü.Eklenecek veri yok !!");
-                return;
-            }
-            else {
-                kutu.kutuLocationLatitude.id = res[0].id;
-                kutu.kutuLocationLatitude.value = res[0].value;
-                kutu.kutuLocationLatitude.feed_id = res[0].feed_id;
-                kutu.kutuLocationLatitude.created_at = res[0].created_at;
-                kutu.kutuLocationLatitude.feed_key = res[0].feed_key;
-                console.log("Kutu Location Latitude Bilgisi :", kutu.kutuLocationLatitude);
-                console.log("\n");
-            }
-        });
-    });
-
-    orchestration.locationlongitudeGetURL(element, (opt) => {
-        console.log(opt);
-        options = opt;
-        httpRequest.httpGetRequest(options, function (err, res) {
-            if (err) {
-                console.log("Got an error: ", err);
-                return;
-            }
-            if (res.length === 0) {
-                console.log("Response boş döndü.Eklenecek veri yok !!");
-                return;
-            }
-            else {
-                kutu.kutuLocationLongitude.id = res[0].id;
-                kutu.kutuLocationLongitude.value = res[0].value;
-                kutu.kutuLocationLongitude.feed_id = res[0].feed_id;
-                kutu.kutuLocationLongitude.created_at = res[0].created_at;
-                kutu.kutuLocationLongitude.feed_key = res[0].feed_key;
-                console.log("Kutu Location Longitude Bilgisi :", kutu.kutuLocationLongitude);
-                console.log("\n");
-            }
-        });
-    });
-
-    orchestration.boxID_URL(element, (opt) => {
-        console.log(opt);
-        options = opt;
-        httpRequest.httpGetRequest(options, function (err, res) {
-            if (err) {
-                console.log("Got an error: ", err);
-                return;
-            }
-            if (res.length === 0) {
-                console.log("Response boş döndü.Eklenecek veri yok !!");
-                return;
-            }
-            else {
-                kutu.kutuID.id = res[0].id;
-                kutu.kutuID.value = res[0].value;
-                kutu.kutuID.feed_id = res[0].feed_id;
-                kutu.kutuID.created_at = res[0].created_at;
-                kutu.kutuID.feed_key = res[0].feed_key;
-                console.log("Kutu ID  Bilgisi :", kutu.kutuID);
-                console.log("\n");
-            }
-        });
-    });
-
-    orchestration.temperatureGetURL(element, (opt) => {
-        // requesIDS dizisini sifirliyoruz.
-        requestIDS = [];
-        console.log(opt);
-        options = opt;
-        httpRequest.httpGetRequest(options, function (err, res) {
-            if (err) {
-                console.log("Got an error: ", err);
-                return;
-            }
-            if (res.length === 0) {
-                console.log("Response boş döndü.Eklenecek veri yok !!");
-                return;
-            }
-            else {
-
-                for (var key in res) {
-                    if (res.hasOwnProperty(key)) {
-                        if (key === 0) {
-                            requestIDS.push(res[key].id);
-                            kutu.temperature.push(
-                                {
-                                    id: res[key].id,
-                                    value: res[key].value,
-                                    feed_id: res[key].feed_id,
-                                    created_at: res[key].created_at,
-                                    feed_key: res[key].feed_key
-                                }
-                            );
-                        }
-                        // 0.adimdan sonraki adimlarda daha once donen response'lerin id'leri ayni olmayanlari aliniyor.
-                        else if (requestIDS.indexOf(res[key].id) < 0) {
-                            requestIDS.push(res[key].id);
-                            kutu.temperature.push(
-                                {
-                                    id: res[key].id,
-                                    value: res[key].value,
-                                    feed_id: res[key].feed_id,
-                                    created_at: res[key].created_at,
-                                    feed_key: res[key].feed_key
-                                }
-                            );
-                        }
-                    }
-                }
-                console.log("Kutu Sıcaklık  Bilgisi :", kutu.temperature);
-                console.log("\n");
-            }
-        });
-    });
+log4js.configure({
+    appenders: { cheese: { type: 'file', filename: '../../var/log/sws_logs/activities.log' } },
+    categories: { default: { appenders: ['cheese'], level: 'DEBUG' } }
 });
+
+const logger = log4js.getLogger('activities');
+var userInfo = require('./config/users');
+
+var kutuNumber = userInfo.kutuNumber;
+var users = userInfo.users;
+
 
 /*
-
-
-
-// TO DO : Burada ornek olarak başlangic ve bitis konumlari tanimlanip yol hesaplanmiştir.Yapilmasi gereken Cop araciin degisken konumunun ogrenilmesi ve
-// en dolu cop kutusu ve konumunu belirleyip bu iki degeri origin ve destination icerisine yazilacaktir.
-let origin = {
-    latitude : 40.770960,
-    longitude : 29.891243
-};
-
-let destination = {
-    latitude : 40.768091,
-    longitude : 29.937862
-}
-
-googleMaps.distanceCalculate(origin, destination, (result)=>{
-    googleMapsPath = result;
-    //console.log('Sonuc : ', result.routes[0].legs);
+getDataFromAdafruit.getData(users, kutuNumber, function(error, prefixError){
+    logger.info(prefixError, error);
 });
 
+
+sampleDataAddDatabase.sampleBoxAddDatabase(function(error, prefixError){
+    logger.info(prefixError, error);
+});
+
+sampleDataAddDatabase.sampleTruckAddDatabase(function(error, prefixError){
+    logger.info(prefixError, error);
+});
 */
+
+var dolulukEsikDegeri = 35;
+var kutu = [];
+var arac = [];
+
+distance.key('AIzaSyD2zhehMtRu-69wZ4fuoUO0Exn877gAnx8');
+distance.units('metric');
+distance.mode('driving');
+
+databaseOperations.getDataFromDatabase('kutular', function (error, result) {
+    // TODO : Eğer çöp kutusunun available değeri 0 ve doluluk değeri eşik değerinden küçükse 
+    // bü çöp kutusu boşaltılmış demektir.Available değeri 1 olarak değiştirilir.
+    if (error){
+        logger.info('databaseOperations.getDataFromDatabase- kutular - error : ', error);
+        return;
+    }
+  //  console.log('KUTU: ');
+   // console.log(result);
+    kutu = createHelper.boxCreater(result, dolulukEsikDegeri, kutu);
+
+    var distanceArray = [];
+    var distanceTextArray = [];
+
+    async.waterfall([
+        function (callback) {
+            kutu = createHelper.assignValueBox(result, dolulukEsikDegeri, kutu);
+            callback();
+        },
+        function (callback) {
+        //  printHelper.printBox(kutu);
+            callback();
+        },
+        function (callback) {
+            databaseOperations.getDataFromDatabase('araclar', function (errorArac, resultArac) {
+                if (errorArac){
+                    logger.info('databaseOperations.getDataFromDatabase- araclar - error : ', errorArac);
+                    return;
+                }
+                // TODO : Eğer bir aracın çöp kutusuyla işi bitmiş ise available değeri 0 -> 1 yapılmalıdır.Burada kontrol olarak
+                // en son kullanılan çöp kutusuna da ihtiyaç vardır.
+                arac = createHelper.truckCreater(resultArac, arac);
+                arac = createHelper.assignValueTruck(resultArac, arac);
+                callback();
+            });
+        },
+        function (callback) {
+          //  printHelper.printTruck(arac);
+
+            // başlangıç noktasının location ve available bilgileri
+            var origins = [];
+            origins.location = [];
+            origins.available = [];
+
+            for (var k = 0; k < arac.length; k++) {
+                var x = Number(arac[k].locationLatitude).toFixed(6) + ',' + Number(arac[k].locationLongitude).toFixed(6);
+                origins.location.push(x);
+                origins.available.push(arac[k].available);
+            }
+
+            for (var k = 0; k < kutu.length; k++) {
+                var x = Number(kutu[k].locationLatitude).toFixed(6) + ',' + Number(kutu[k].locationLongitude).toFixed(6);
+                kutu[k].destinations.push(x);
+            }
+
+            /*
+            for (var k = 0; k < kutu.length; k++) {
+                logger.info('Destination : ', kutu[k].destinations);
+            }
+
+            for (var k = 0; k < origins.length; k++) {
+               logger.info('Arac Listesi : ', origins[k]);
+            }
+            */
+
+
+            // sonuc[k].aracLocation  => sonuc[k].arac       => sonuc[k].arac.aracLocation
+
+            var islem1 = [];
+            islem1 = createHelper.dataCreater(islem1, kutu);
+
+            var sonuc = [];
+            sonuc = createHelper.dataCreater(sonuc, kutu);
+
+            var sıralıSonuc = [];
+            sıralıSonuc = createHelper.dataCreater(sıralıSonuc, kutu);
+
+
+            // count degeri foreach'in son değerini bulabilmek için kullanıldı.
+            var count = 0;
+            var calculatedDistanceMatrix = createHelper.Create2DArray(kutu.length);
+            kutu.forEach(kutular => {
+                var count2 = 0;
+                distance.matrix(origins.location, kutular.destinations, function (err, distances) {
+                    logger.info('Kutu No : ' + count + '    ' + 'Kutu Location:' + kutular.destinations);
+                    // logger.info('Origin Ava : ' + origins.available + '    ' + 'Origin Location:' +  origins.location);
+
+                    if (err) {
+                        return logger.info('distance.matrix - error : ', err);
+                    }
+                    if (!distances) {
+                        return logger.info('no distances');
+                    }
+
+                    if (distances.status == 'OK') {
+
+                        for (var i = 0; i < origins.location.length; i++) {
+
+                            for (var j = 0; j < 1; j++) { // kutular.destinations kutular dizisinin bir elemanını temsil ettigi icin j<1 kullanıldı.
+                                //var origin = distances.origin_addresses[i];
+                                //  var destination = distances.destination_addresses[j];
+                                if (distances.rows[0].elements[j].status == 'OK') {
+
+                                    // distance.text -> 26000 metreyi 26 km olarak yazar.
+                                    var distanceText = distances.rows[i].elements[j].distance.text;
+                                    var distance = distances.rows[i].elements[j].distance.value;
+                                    kutular.distanceArray = distance;
+                                    kutular.distanceTextArray = distanceText;
+                                    // logger.info('Arac : '+origins.location[i] + ' '+'Distace : ' + kutular.distanceArray + ' ' + 'Location : ' + kutular.destinations + ' ' + 'Distance Text : ' + kutular.distanceTextArray + ' ' + 'Doluluk : ' + kutular.solidityRatio);
+
+                                    //logger.info('Distace  : ' + kutular.distanceArray + ' ' + 'Location : ' + kutular.destinations + ' ' + 'Distance Text : ' + kutular.distanceTextArray + ' ' + 'Doluluk : ' + kutular.solidityRatio);
+                                    // var destination = distances.destination_addresses[j];                                                                  
+
+                                    if (count != kutu.length) {
+                                        calculatedDistanceMatrix[count][i] = kutular.distanceArray;
+                                    }
+                                    islem1[i].aracLocation.push(origins.location[i]);
+                                    islem1[i].kutuLocation.push(kutular.destinations);
+                                    islem1[i].distance.push(calculatedDistanceMatrix[count][i]);
+                                    islem1[i].aracAvailable.push(origins.available[i]);
+                                    islem1[i].kutuAvailable.push(kutular.available);
+
+
+                                    //logger.info('Arac Location '+ i + ' : ' +origins.location[i] + ' ' + 'Kutu Location : ' + kutular.destinations + ' ' + 'Distance Text : ' + kutular.distanceTextArray + ' ' + 'Matris: ' +calculatedDistanceMatrix[count][i]);
+
+
+                                    // Buradan itibaren araç ve kutu arasındaki mesafeye göre sıralama işlemi yapılır.
+                                    if (count == kutu.length - 1 && count2 == arac.length - 1) {
+
+                                        for (var m = 0; m < arac.length; m++) {
+
+                                            for (var n = 0; n < islem1[0].kutuLocation.length; n++) {
+
+                                                // console.log('Aracin Konumu :' + islem1[m].aracLocation[n] + ' ' + 'Kutunun Konumu :'+ islem1[m].kutuLocation[n] + ' ' + 'Aradaki Mesafe :' + islem1[m].distance[n] + '\n');
+                                                sonuc[n].aracLocation.push(islem1[m].aracLocation[n]);
+                                                sonuc[n].kutuLocation.push(islem1[m].kutuLocation[n]);
+                                                sonuc[n].distance.push(islem1[m].distance[n]);
+                                                sonuc[n].aracAvailable.push(islem1[m].aracAvailable[n]);
+                                                sonuc[n].kutuAvailable.push(islem1[m].kutuAvailable[n]);
+
+
+                                                if (m == arac.length - 1 && n == islem1[0].kutuLocation.length - 1) {
+                                                    //    console.log(sonuc);
+                                                    //   console.log('After : \n');
+                                                    for (var k = 0; k < sonuc.length; k++) {
+                                                        var tmpSonuc = sortHelper.sort(sonuc[k]);
+
+                                                        sıralıSonuc[k].aracLocation.push(tmpSonuc.aracLocation);
+                                                        sıralıSonuc[k].kutuLocation.push(tmpSonuc.kutuLocation);
+                                                        sıralıSonuc[k].distance.push(tmpSonuc.distance);
+                                                        sıralıSonuc[k].aracAvailable.push(tmpSonuc.aracAvailable);
+                                                        sıralıSonuc[k].kutuAvailable.push(tmpSonuc.kutuAvailable);
+
+                                                        //      console.log('Arac :' + tmpSonuc.aracLocation + ' \n' + 'Kutu :'+ tmpSonuc.kutuLocation + ' \n' + 'Yol: ' +tmpSonuc.distance + '\n' + 'Arac Musaitlik : ' + tmpSonuc.aracAvailable + '\n' + 'Kutu Musaitlik : ' + tmpSonuc.kutuAvailable);
+
+
+                                                        if (k == sonuc.length - 1) {
+                                                            console.log('Sıralanmış Veri : \n');
+
+
+                                                            for (var x = 0; x < sıralıSonuc.length; x++) {
+                                                                // console.log(sıralıSonuc[x]);
+
+
+                                                                // Eğer kutuya herhangi bir rota girilmemişse
+                                                                if (sıralıSonuc[x].kutuAvailable[0][x] == 1) {
+                                                                    // Burada araclarla ilgili islemleri ilk (sıralıSonuc[0]) üzerinden yaptım.Çünkü 
+                                                                    // diger turlu hepsinde araclar ayrı ayrı yaratıldığı için birinde dolu olan arac bir arac
+                                                                    // farklı kutuda yine aynı arac boş gözüküyordu.
+
+                                                                    for (var w = 0; w < sıralıSonuc[0].aracAvailable[0].length; w++) {
+                                                                        // Kutuya herhangi bir rota girilmemiş ve arac musaitse 
+                                                                        if (sıralıSonuc[0].aracAvailable[0][w] == 1 && sıralıSonuc[x].kutuAvailable[0][x] == 1) {
+                                                                        //    console.log('W değeri : ', w);
+                                                                        //    console.log('X değeri : ',x );
+                                                                            // ilgili arac ve ilgili kutu musaitlik durumu false yapılır.
+
+                                                                            console.log('Kutu : ' + sıralıSonuc[x].kutuLocation[0][x] + ' ' + 'Arac :' + sıralıSonuc[0].aracLocation[0][w] + ' ' + 'Mesafe : ' + sıralıSonuc[x].distance[0][x] );
+                                                                            sıralıSonuc[0].aracAvailable[0][w] = 0;
+                                                                            sıralıSonuc[x].kutuAvailable[0][x] = 0;
+
+                                                                            // veritabanında sorgu için location hazırlama
+                                                                            var tmp1 = String(sıralıSonuc[x].kutuLocation[0][x]);
+                                                                            var tmpLocationKutu = tmp1.split(',');
+                                                                        
+                                                                            var tmpKutu = {
+                                                                                kutuLocationLatitude: tmpLocationKutu[0],
+                                                                                kutuLocationLongitude:   tmpLocationKutu[1],
+                                                                                availableNo: x
+                                                                            };
+
+                                                                            var tmp2 = String(sıralıSonuc[0].aracLocation[0][w]);
+                                                                            var tmpLocationArac = tmp2.split(',');
+
+
+                                                                            // Bu kısımlarda bulunan availableNo değeri kod tekrar çalıştığı zaman veritabanına bakıldığında
+                                                                            // hangi aracın hangi kutuya gittiğini göstermek ve aracın available değeri güncelleyebilmek için
+                                                                            // kullanılmaktadır.
+                                                                            var tmpArac = {
+                                                                                lat: tmpLocationArac[0],
+                                                                                lng: tmpLocationArac[1],
+                                                                                availableNo: w
+                                                                            }
+
+                                                                            // Bu location bilgilerinde bulunan kutuların available değerleri 0 yapılır.
+                                                                            databaseOperations.updateDatabase('kutular','0',  tmpKutu, function (error) {
+                                                                                if (error) {
+                                                                                    errorDetail = 'databaseOperations.updateDatabase - Kutular tablosunu available alanı guncelleme sorgusu hata verdi : ';
+                                                                                //  logger.info('Kutular tablosunu guncelleme sorgusu hata verdi : ', error);
+                                                                                    callback(error, errorDetail);
+                                                                                    return;
+                                                                                }
+                                                                                else {
+                                                                                    logger.info('databaseOperations.updateDatabase - Kutular tablosu available alanı basariyla guncellendi');
+                                                                                }
+                                                                            });
+
+
+                                                                            databaseOperations.updateDatabase('araclar','0',  tmpArac, function (error) {
+                                                                                if (error) {
+                                                                                    errorDetail = 'databaseOperations.updateDatabase - Araclar tablosunu available alanı guncelleme sorgusu hata verdi : ';
+                                                                                //  logger.info('Kutular tablosunu guncelleme sorgusu hata verdi : ', error);
+                                                                                    callback(error, errorDetail);
+                                                                                    return;
+                                                                                }
+                                                                                else {
+                                                                                    logger.info('databaseOperations.updateDatabase - Araclar tablosu available alanı basariyla guncellendi');
+                                                                                }
+                                                                            });
+
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                            }
+
+                                                            for (var x = 0; x < sıralıSonuc.length; x++) {
+
+                                                       //         console.log(sıralıSonuc[x]);
+
+                                                                //console.log('Arac : ', sıralıSonuc[x].aracLocation[0][0]);
+                                                                //console.log('Kutu : ', sıralıSonuc[x].kutuLocation[0][0]);
+                                                                //console.log('Distance : ', sıralıSonuc[x].distance[0][0]);
+                                                                //console.log('Arac Musaitlik : ', sıralıSonuc[x].aracAvailable[0][0]);
+                                                                //console.log('Kutu Musaitlik : ', sıralıSonuc[x].kutuAvailable[0][0]);
+
+                                                                //Burada çıkan  araç kutu ve mesafe bilgileri yeni bir tabloya yazılabilir.Bu arac ve kutuların
+                                                                // available değerleri false(0) yapılacak.Fakat dikkat edilmesi gereken bir nokta var.Bir araç birden fazla
+                                                                // çop kutusuna yakın olabilir.Bunun kontrolünü ve algoritmasını düşün.
+
+                                                                //    console.log('Arac' +x+' :' + sıralıSonuc[x].aracLocation + ' \n' + 'Kutu :'+ sıralıSonuc[x].kutuLocation + ' \n' + 'Yol: ' +sıralıSonuc[x].distance + '\n' + 'Arac Musaitlik : ' + sıralıSonuc[x].aracAvailable + '\n' + 'Kutu Musaitlik : ' + sıralıSonuc[x].kutuAvailable);
+
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    count2++;
+                                } else {
+                                    // console.log(destination + ' is not reachable by land from ' + origin);
+                                }
+                            }
+                        }
+                    }
+                    count++;
+                });
+            });
+            callback();
+        }
+    ]);
+});
